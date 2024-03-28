@@ -1,6 +1,5 @@
 import express, { json } from 'express'
 import cors from 'cors'
-import { maxId } from './src/functionality.js'
 
 let notes = [
 	{
@@ -20,18 +19,21 @@ let notes = [
 	},
 ]
 
+export const maxId = () =>
+	notes.length > 0 ? Math.max(...notes.map(note => note.id)) + 1 : 0
+
 const app = express()
 app.use(json())
 app.use(cors())
 
-app.get('/api/notes', (request, response) => {
-	response.json(notes)
+app.get('/api/notes', (_, res) => {
+	res.json(notes)
 })
 
-app.get('/api/notes/:id', (request, response) => {
-	const id = Number(request.params.id)
+app.get('/api/notes/:id', (req, res) => {
+	const id = Number(req.params.id)
 	const note = notes.find(note => note.id === id)
-	note ? response.json(note) : response.status(404).end()
+	note ? res.json(note) : res.status(404).end()
 })
 
 app.post('/api/notes', (req, res) => {
@@ -42,7 +44,7 @@ app.post('/api/notes', (req, res) => {
 	}
 	const note = {
 		id: maxId(),
-		constent: content,
+		content,
 		import: important || false,
 	}
 
