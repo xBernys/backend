@@ -24,6 +24,7 @@ export const maxId = () =>
 
 const app = express()
 app.use(json())
+app.use(express.static('dist'))
 app.use(cors())
 
 app.get('/api/notes', (_, res) => {
