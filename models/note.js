@@ -1,32 +1,16 @@
-import { set, connect, Schema, model } from 'mongoose'
-
-set('strictQuery', false)
-
-const url = process.env.MONGODB_URI
-
-console.log('connecting to', url)
-
-connect(url)
-
-	.then(_ => {
-		console.log('connected to MongoDB')
-	})
-	.catch(error => {
-		console.log('error connecting to MongoDB:', error.message)
-	})
+import { Schema, model } from 'mongoose'
 
 const noteSchema = new Schema({
 	content: {
 		type: String,
-		minLength: 5,
 		required: true,
+		minlength: 5,
 	},
-
 	important: Boolean,
 })
 
 noteSchema.set('toJSON', {
-	transform: (_, returnedObject) => {
+	transform: (document, returnedObject) => {
 		returnedObject.id = returnedObject._id.toString()
 		// biome-ignore lint/performance/noDelete: <explanation>
 		delete returnedObject._id
