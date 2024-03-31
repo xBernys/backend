@@ -1,71 +1,83 @@
+import 'dotenv/config'
 import express, { json } from 'express'
 import cors from 'cors'
-
-let notes = [
-	{
-		id: 1,
-		content: 'HTML is easy',
-		important: true,
-	},
-	{
-		id: 2,
-		content: 'Browser can execute only JavaScript',
-		important: false,
-	},
-	{
-		id: 3,
-		content: 'GET and POST are the most important methods of HTTP protocol',
-		important: true,
-	},
-]
-
-export const maxId = () =>
-	notes.length > 0 ? Math.max(...notes.map(note => note.id)) + 1 : 0
+import Note from './models/note.js'
 
 const app = express()
 app.use(json())
 app.use(express.static('dist'))
 app.use(cors())
 
+// app.get('/api/notes', (_, res) => {
+// 	res.json(notes)
+// })
+
 app.get('/api/notes', (_, res) => {
-	res.json(notes)
+	Note.find({}).then(notes => res.json(notes))
 })
 
-app.get('/api/notes/:id', (req, res) => {
-	const id = Number(req.params.id)
-	const note = notes.find(note => note.id === id)
-	note ? res.json(note) : res.status(404).end()
+app.get('/api/notes/:id', (req, res, next) => {
+	Note.findById(req.params.id)
+		.then(note =>
+			note
+				? res.json(note)
+				: res.status(400).send({ error: 'malformatted id' }),
+		)
+		.catch(err => next(err))
 })
 
-app.post('/api/notes', (req, res) => {
-	const { content, important } = req.body
+app.post('/api/notes', (req, res, next) => {
+	const body = req.body
 
-	if (!content) {
-		return res.status(404).json({ error: 'content missing' })
+	const note = new Note({
+		content: body.content,
+		important: body.important || false,
+	})
+
+	note
+		.save()
+		.then(savedNote => {
+			res.json(savedNote)
+		})
+		.catch(err => next(err))
+})
+
+app.put('/api/notes/:id', (req, res, next) => {
+	Note.findByIdAndUpdate(req.params.id, req.body, {
+		new: true,
+		runValidators: true,
+		context: 'query',
+	})
+		.then(note => res.json(note))
+		.catch(err => next(err))
+})
+
+app.delete('/api/notes/:id', (req, res, next) => {
+	Note.findByIdAndDelete(req.params.id)
+		.then(note =>
+			note
+				? res.status(204).json(note)
+				: res.status(204).json({ error: 'The note does not exist' }),
+		)
+		.catch(err => next(err))
+})
+
+//midelware
+const errorHandler = (error, _, response, next) => {
+	console.error(error.message)
+
+	if (error.name === 'CastError') {
+		return response.status(400).send({ error: 'malformatted id' })
 	}
-	const note = {
-		id: maxId(),
-		content,
-		import: important || false,
+
+	if (error.name === 'ValidationError') {
+		return response.status(400).json({ error: error.message })
 	}
 
-	notes = [note, ...notes]
-	res.json(note)
-})
+	next(error)
+}
 
-app.put('/api/notes/:id', (req, res) => {
-	const id = Number(req.params.id)
-	notes = notes.map(note => (note.id === id ? { id, ...req.body } : note))
-
-	res.json(notes.find(note => note.id === id))
-})
-
-app.delete('/api/notes/:id', (req, res) => {
-	const id = Number(req.params.id)
-
-	notes = notes.filter(note => note.id !== id)
-	res.status(204).json({ message: 'eliminado satisfactoriamente' })
-})
+app.use(errorHandler)
 
 const PORT = process.env.PORT || 3001
 app.listen(PORT, () => {
