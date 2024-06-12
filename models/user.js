@@ -1,19 +1,22 @@
-import mongoose, { Schema, model } from 'mongoose'
+import { Schema, model } from 'mongoose'
 
-const noteSchema = new Schema({
-  content: {
+const userSchema = new Schema({
+  username: {
     type: String,
     required: true,
-    minlength: 5,
+    unique: true,
   },
-  important: Boolean,
-  userId: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'User',
-  },
+  name: String,
+  passwordHash: String,
+  // notes: [
+  //   {
+  //     type: mongoose.Schema.Types.ObjectId,
+  //     ref: 'Note',
+  //   },
+  // ],
 })
 
-noteSchema.set('toJSON', {
+userSchema.set('toJSON', {
   transform: (document, returnedObject) => {
     returnedObject.id = returnedObject._id.toString()
     // biome-ignore lint/performance/noDelete: <explanation>
@@ -23,4 +26,4 @@ noteSchema.set('toJSON', {
   },
 })
 
-export default model('Note', noteSchema)
+export default model('User', userSchema)

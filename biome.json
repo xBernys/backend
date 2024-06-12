@@ -12,6 +12,10 @@
 			"suspicious": {
 				"noImportAssign": "off"
 			},
+			"nursery": {
+				"noSkippedTests": "warn",
+				"noFocusedTests": "warn"
+			},
 			"correctness": {
 				"noUnusedVariables": "warn",
 				"noUnusedImports": "error",

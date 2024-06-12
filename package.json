@@ -1,26 +1,29 @@
 {
-	"name": "backend",
-	"version": "1.0.0",
-	"description": "",
-	"main": "index.js",
-	"type": "module",
-	"scripts": {
-		"test": "echo \"Error: no test specified\" && exit 1",
-		"dev": "node --watch index.js",
-		"lint": "biome lint --apply . && biome format --write .",
-		"build:ui": "rm -rf dist && cd ../frontend && npm run build && cp -r dist ../backend",
-		"deploy:full": "npm run build:ui && git add . && git commit -m uibuild && git push"
-	},
-	"keywords": [],
-	"author": "",
-	"license": "ISC",
-	"dependencies": {
-		"express": "^4.19.2",
-		"mongoose": "^8.2.4"
-	},
-	"devDependencies": {
-		"dotenv": "^16.4.5",
-		"@biomejs/biome": "^1.6.3",
-		"cors": "^2.8.5"
-	}
+  "name": "backend",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "type": "module",
+  "scripts": {
+    "dev": "bun --watch index.js",
+    "debbuger": "node index.js",
+    "lint": "biome lint --apply . && biome format --write .",
+    "build:ui": "rm -rf dist && cd ../frontend && bun run build && cp -r dist ../backend",
+    "deploy:full": "bun run build:ui && git add . && git commit -m uibuild && git push"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "bcrypt": "^5.1.1",
+    "express": "^4.19.2",
+    "express-async-errors": "^3.1.1",
+    "jsonwebtoken": "^9.0.2",
+    "mongoose": "^8.2.4"
+  },
+  "devDependencies": {
+    "@biomejs/biome": "^1.6.3",
+    "cors": "^2.8.5",
+    "supertest": "^6.3.4"
+  }
 }
